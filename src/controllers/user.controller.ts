@@ -4,8 +4,14 @@ import {
   userValidation,
   loginValidation,
   updateValidation,
+  loginType,
+  updateType,
+  userType,
 } from "../libs/validation";
 import bcrypt from "bcrypt";
+import { ApiError } from "../utils/ApiError";
+import z from "zod";
+import { ApiSuccess } from "../utils/ApiSuccess";
 
 //create new user account
 export const createUser = async (
@@ -13,12 +19,16 @@ export const createUser = async (
   res: express.Response
 ) => {
   const validate = userValidation.parse(req.body);
-  const { email, password, username } = validate;
+  const { email, password, username }: userType = validate;
   try {
     const userExist = await User.findOne({ email: email });
 
     if (userExist) {
-      res.status(500).json("User already exists!");
+      res
+        .status(500)
+        .json(
+          new ApiError(500, "User already exists!", ["User already exists!"])
+        );
     }
 
     if (!email || !password || !username) {
@@ -33,30 +43,40 @@ export const createUser = async (
       email,
       password: hashedPassword,
     });
-    res.status(201).json(createuser);
-  } catch (error: any) {
-    console.log(error);
-    res.status(500).json("Something went wrong!");
+    res.status(201).json(new ApiSuccess(201, "User created!", createuser));
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new ApiError(400, "Something went wrong", [
+        error.errors[0].message,
+      ]);
+    }
+    throw error;
   }
 };
 
 //log in with existing accout
 export const login = async (req: express.Request, res: express.Response) => {
   const validate = loginValidation.parse(req.body);
-  const { email, password } = validate;
+  const { email, password }: loginType = validate;
   try {
     const user = await User.findOne({ email: email });
 
     if (!user) {
-      res.status(404).json("User does not exists!");
+      res
+        .status(404)
+        .json(new ApiError(404, "User not found!", ["User not found!"]));
     }
 
     if (user.password === password) {
-      res.status(201).json("Password correct!");
+      res.status(201).json(new ApiSuccess(200, "Password correct", user));
     }
   } catch (error: any) {
-    console.log(error);
-    res.status(500).json("Something went wrong!");
+    if (error instanceof z.ZodError) {
+      throw new ApiError(400, "Something went wrong", [
+        error.errors[0].message,
+      ]);
+    }
+    throw error;
   }
 };
 
@@ -67,10 +87,12 @@ export const getAllUsers = async (
 ) => {
   try {
     const getUsers = await User.find({});
-    res.status(200).json(getUsers);
+    res.status(200).json(new ApiSuccess(200, "Users found!", getUsers));
   } catch (error: any) {
     console.log(error);
-    res.status(500).json("Something went wrong!");
+    res
+      .status(500)
+      .json(new ApiError(500, "Users not found!", ["Users not found!"]));
   }
 };
 
@@ -82,10 +104,10 @@ export const getUsersById = async (
   try {
     const id = req.params.id;
     const getUserById = await User.findById(id);
-    res.status(200).json(getUserById);
+    res.status(200).json(new ApiSuccess(200, "User gotten", getUserById));
   } catch (error: any) {
     console.log(error);
-    res.status(500).json("Something went wrong!");
+    res.status(500).json(new ApiError(500, "Something went wrong!", error));
   }
 };
 
@@ -97,10 +119,12 @@ export const deleteUser = async (
   try {
     const id = req.params.id;
     const deleteuser = await User.findByIdAndDelete(id);
-    res.status(200).json('Deleted successfully!');
+    res
+      .status(200)
+      .json(new ApiSuccess(200, "Deleted successfully!", deleteuser));
   } catch (error: any) {
     console.log(error);
-    res.status(500).json("Something went wrong!");
+    res.status(500).json(new ApiError(500, "Something went wrong!", error));
   }
 };
 
@@ -110,16 +134,16 @@ export const updateUser = async (
   res: express.Response
 ) => {
   const validate = updateValidation.parse(req.body);
-  const { username } = validate;
+  const { username }: updateType = validate;
   try {
     const id = req.params.id;
     const user = await User.findById(id);
     user.username = username;
     await user.save();
-    res.status(201).json(user);
+    res.status(201).json(new ApiSuccess(201, "user updated", user));
   } catch (error: any) {
     console.log(error);
-    res.status(500).json("Something went wrong!");
+    res.status(500).json(new ApiError(500, "Something went wrong!", error));
   }
 };
 
@@ -132,9 +156,9 @@ export const getUserId = async (
   try {
     const user = await User.findOne({ email: email });
     const userId = user._id.toString();
-    res.status(201).json(userId);
+    res.status(201).json(new ApiSuccess(201, "user's id gotten", userId));
   } catch (error: any) {
     console.log(error);
-    res.status(500).json("Something went wrong!");
+    res.status(500).json(new ApiError(500, "Something went wrong!", error));
   }
 };

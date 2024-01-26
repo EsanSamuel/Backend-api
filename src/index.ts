@@ -5,7 +5,7 @@ import http from "http";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import connectDB from "./libs/connect";
-import user from "./router/user";
+import user from "./routes/user";
 
 const app = express();
 app.use(
