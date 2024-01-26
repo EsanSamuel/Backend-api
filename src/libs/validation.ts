@@ -30,3 +30,12 @@ export const productValidation = z.object({
 });
 
 export type productType = z.infer<typeof productValidation>;
+
+export const updateProductValidation = z.object({
+  title: z.string().min(1),
+  details: z.string().min(1),
+  image: z.string().min(1),
+  price: z.string().min(1),
+});
+
+export type updateProductType = z.infer<typeof updateProductValidation>;

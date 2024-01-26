@@ -5,7 +5,8 @@ import http from "http";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import connectDB from "./libs/connect";
-import user from "./routes/user";
+import user from "./routes/user.route";
+import product from "./routes/product.route";
 
 const app = express();
 app.use(
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(compression());
 app.use("/", user);
+app.use("/", product);
 
 const startServer = async () => {
   connectDB();

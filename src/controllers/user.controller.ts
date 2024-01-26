@@ -12,6 +12,7 @@ import bcrypt from "bcrypt";
 import { ApiError } from "../utils/ApiError";
 import z from "zod";
 import { ApiSuccess } from "../utils/ApiSuccess";
+import generateToken from "../libs/jwt";
 
 //create new user account
 export const createUser = async (
@@ -32,7 +33,11 @@ export const createUser = async (
     }
 
     if (!email || !password || !username) {
-      res.status(404).json("Credentials required!");
+      res
+        .status(404)
+        .json(
+          new ApiError(404, "Credentials required!", ["Credentials required!"])
+        );
     }
 
     const salt = bcrypt.genSaltSync(10);
@@ -43,7 +48,11 @@ export const createUser = async (
       email,
       password: hashedPassword,
     });
-    res.status(201).json(new ApiSuccess(201, "User created!", createuser));
+
+    const token = generateToken(createuser._id);
+    res
+      .status(201)
+      .json(new ApiSuccess(201, "User created!", { user: createuser, token }));
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new ApiError(400, "Something went wrong", [
@@ -67,8 +76,13 @@ export const login = async (req: express.Request, res: express.Response) => {
         .json(new ApiError(404, "User not found!", ["User not found!"]));
     }
 
-    if (user.password === password) {
-      res.status(201).json(new ApiSuccess(200, "Password correct", user));
+    const isPasswordValid = bcrypt.compareSync(password, user.password);
+
+    if (isPasswordValid) {
+      const token = generateToken(user._id);
+      res
+        .status(201)
+        .json(new ApiSuccess(200, "Password correct", { user: user, token }));
     }
   } catch (error: any) {
     if (error instanceof z.ZodError) {
