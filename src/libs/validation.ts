@@ -59,3 +59,15 @@ export const updateCommentValidation = z.object({
 });
 
 export type updateCommentType = z.infer<typeof updateCommentValidation>;
+
+export const imageValidation = z.object({
+  image: z.string().min(1),
+});
+
+export type imageType = z.infer<typeof imageValidation>;
+
+export const bioValidation = z.object({
+  bio: z.string().min(1),
+});
+
+export type bioType = z.infer<typeof bioValidation>;

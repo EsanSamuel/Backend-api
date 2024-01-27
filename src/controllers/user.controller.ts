@@ -7,12 +7,23 @@ import {
   loginType,
   updateType,
   userType,
+  imageValidation,
+  imageType,
+  bioValidation,
+  bioType
 } from "../libs/validation";
 import bcrypt from "bcrypt";
 import { ApiError } from "../utils/ApiError";
 import z from "zod";
 import { ApiSuccess } from "../utils/ApiSuccess";
 import generateToken from "../libs/jwt";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: "dirm0bwdw",
+  api_key: "244737511899697",
+  api_secret: "LBf0Bay00WC4w1bonkdeapChUO4",
+});
 
 //create new user account
 export const createUser = async (
@@ -176,3 +187,79 @@ export const getUserId = async (
     res.status(500).json(new ApiError(500, "Something went wrong!", error));
   }
 };
+
+export const createProfilePicture = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const validate = imageValidation.parse(req.body);
+  const { image }: imageType = validate;
+  const ImageUrl = await cloudinary.uploader.upload(image);
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    user.image = ImageUrl.url;
+    await user.save();
+    res.status(201).json(new ApiSuccess(201, "Profile Picture created!", user));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(new ApiError(500, "Something went wrong!", error));
+  }
+};
+
+export const editProfilePicture = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const validate = imageValidation.parse(req.body);
+  const { image }: imageType = validate;
+  const ImageUrl = await cloudinary.uploader.upload(image);
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    user.image = ImageUrl.url;
+    await user.save();
+    res.status(201).json(new ApiSuccess(201, "Profile Picture edited!", user));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(new ApiError(500, "Something went wrong!", error));
+  }
+};
+
+export const createBio = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const validate = bioValidation.parse(req.body);
+  const { bio }: bioType = validate;
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    user.bio = bio;
+    await user.save();
+    res.status(201).json(new ApiSuccess(201, "bio created!", user));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(new ApiError(500, "Something went wrong!", error));
+  }
+};
+
+export const editBio = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const validate = bioValidation.parse(req.body);
+  const { bio }: bioType = validate;
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    user.bio = bio;
+    await user.save();
+    res.status(201).json(new ApiSuccess(201, "Bio edited!", user));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(new ApiError(500, "Something went wrong!", error));
+  }
+};
+
+
