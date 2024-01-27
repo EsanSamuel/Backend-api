@@ -1,3 +1,4 @@
+import authenticateToken from "../middlewares/auth.middleware";
 import {
   createProduct,
   deleteProduct,

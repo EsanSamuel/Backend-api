@@ -7,6 +7,8 @@ import cookieParser from "cookie-parser";
 import connectDB from "./libs/connect";
 import user from "./routes/user.route";
 import product from "./routes/product.route";
+import like from "./routes/like.route";
+import comment from './routes/comment.route'
 
 const app = express();
 app.use(
@@ -22,6 +24,8 @@ app.use(cookieParser());
 app.use(compression());
 app.use("/", user);
 app.use("/", product);
+app.use("/", like);
+app.use("/", comment);
 
 const startServer = async () => {
   connectDB();

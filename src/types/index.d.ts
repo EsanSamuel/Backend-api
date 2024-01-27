@@ -15,4 +15,16 @@ export interface IProduct extends Document {
   details: string;
   price: string;
   image: string;
+  likes: number;
+}
+
+export interface ILike extends Document {
+  poster: mongoose.Types.ObjectId;
+  product: mongoose.Types.ObjectId;
+}
+
+export interface IComment extends Document {
+  poster: mongoose.Types.ObjectId;
+  product: mongoose.Types.ObjectId;
+  comment: string;
 }

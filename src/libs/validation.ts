@@ -39,3 +39,23 @@ export const updateProductValidation = z.object({
 });
 
 export type updateProductType = z.infer<typeof updateProductValidation>;
+
+export const likeValidation = z.object({
+  userId: z.string().min(1),
+});
+
+export type likeType = z.infer<typeof likeValidation>;
+
+export const commentValidation = z.object({
+  userId: z.string().min(1),
+  productId: z.string().min(1),
+  comment: z.string().min(1),
+});
+
+export type commentType = z.infer<typeof commentValidation>;
+
+export const updateCommentValidation = z.object({
+  comment: z.string().min(1),
+});
+
+export type updateCommentType = z.infer<typeof updateCommentValidation>;
