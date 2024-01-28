@@ -8,7 +8,7 @@ import connectDB from "./libs/connect";
 import user from "./routes/user.route";
 import product from "./routes/product.route";
 import like from "./routes/like.route";
-import comment from './routes/comment.route'
+import comment from "./routes/comment.route";
 
 const app = express();
 app.use(
@@ -26,6 +26,10 @@ app.use("/", user);
 app.use("/", product);
 app.use("/", like);
 app.use("/", comment);
+
+app.get("/", (req: express.Request, res: express.Response) => {
+  res.send("Server is running!");
+});
 
 const startServer = async () => {
   connectDB();
